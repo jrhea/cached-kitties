@@ -22,12 +22,7 @@ cache.on('error', (err) => {
 // add X-Response-Time header
 router.use(responseTime());
 
-// test route
-router.get('/', function(req, res, next) {
-    res.json({ message: "It's werking." });
-});
-
-router.get('/views/:network/getTransactionsByBlockHash', function(req, res, next) {
+router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
     var url = 'https://api.infura.io/v1/jsonrpc/'+req.params.network+'/eth_getBlockTransactionCountByHash?params='+req.query.params;
     return query(url).then(result => {
         res.status(200).json(result)
