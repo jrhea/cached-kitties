@@ -5,7 +5,7 @@ var path = require('path');
 // swagger definition
 var swaggerDefinition = {
   info: {
-    title: 'Cached Kitties,
+    title: 'Cached Kitties',
     version: '1.0.0',
     description: 'A Crypto Kitty read cache API service.',
   },
