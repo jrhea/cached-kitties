@@ -40,7 +40,7 @@ router.use(responseTime());
  */
 router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
     var url = baseURL+'/'+req.params.network+'/eth_getBlockTransactionCountByHash?params='+req.query.params;
-    return query(url).then(result => {
+    return query(url,req.cache).then(result => {
         let promises = [];
         let txCount = parseInt(result.result);
         let params = JSON.parse(req.query.params);
