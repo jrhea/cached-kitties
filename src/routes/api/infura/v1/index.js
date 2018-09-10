@@ -1,5 +1,5 @@
 var router = require('express').Router();
 
-router.use('/infura', require('./infura'));
+router.use('/', require('./infura'));
 
 module.exports = router;
