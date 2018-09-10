@@ -2,7 +2,7 @@ var router = require('express').Router();
     axios = require('axios');
     redis = require('redis');
     responseTime = require('response-time');
-    kitties = require('../../models/kitties');
+    kitties = require('../../../models/kitties');
 
 // create and connect redis client to local instance.
 var cache = redis.createClient();
