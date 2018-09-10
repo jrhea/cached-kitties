@@ -6,6 +6,8 @@ var router = require('express').Router();
 // create and connect redis client to local instance.
 var cache = redis.createClient();
 
+var baseURL = 'https://api.infura.io/v1/jsonrpc';
+
 cache.on('connect', () => {
   console.log('Connected to redis');
   cache.flushdb((err,succeeded) => {
@@ -22,17 +24,44 @@ cache.on('error', (err) => {
 // add X-Response-Time header
 router.use(responseTime());
 
+/**
+ * @swagger
+ * /:network/view_getTransactionsByHash:
+ *   get:
+ *     description: return all transactions found in a block hash
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *     responses:
+ *       200:
+ *         description: a list of transactions
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: 'string'
+ */
 router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
-    var url = 'https://api.infura.io/v1/jsonrpc/'+req.params.network+'/eth_getBlockTransactionCountByHash?params='+req.query.params;
+    var url = baseURL+'/'+req.params.network+'/eth_getBlockTransactionCountByHash?params='+req.query.params;
     return query(url).then(result => {
-        res.status(200).json(result)
+        let promises = [];
+        let txCount = parseInt(result.result);
+        let params = JSON.parse(req.query.params);
+        params.push("0x0");
+        for(let i = 0; i < txCount; i++){
+            params[1]="0x"+i.toString(16);
+            url = baseURL+'/'+req.params.network+'/eth_getTransactionByBlockHashAndIndex?params='+JSON.stringify(params);
+            promises.push(query(url));
+        }
+        Promise.all(promises).then(results => {
+            res.status(200).json(results);
+        });
     }).catch(err => {
         res.json(err);
     });
 });
 
 router.get('/:network/:method', function(req, res, next) {
-    var url = 'https://api.infura.io/v1/jsonrpc' + req.url;
+    var url = baseURL + req.url;
     return query(url).then(result => {
         res.status(200).json(result)
     }).catch(err => {
