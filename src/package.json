@@ -4,9 +4,9 @@
   "description": "A Crypto Kitty read cache API service",
   "main": "server.js",
   "scripts": {
-    "start": "PORT=8080 REDIS_URL=127.0.0.1 node ./server.js",
+    "prod": "PORT=8080 REDIS_URL=127.0.0.1 node ./server.js",
     "dev": "sh scripts/run-dev.sh",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "sh `pwd`/scripts/run-tests.sh"
   },
   "author": "jonny rhea",
   "license": "MIT",
@@ -25,5 +25,10 @@
     "response-time": "^2.3.2",
     "swagger-jsdoc": "^3.0.3",
     "web3": "^1.0.0-beta.36"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^4.2.0",
+    "mocha": "^5.2.0"
   }
 }

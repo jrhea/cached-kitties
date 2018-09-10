@@ -84,3 +84,6 @@ terminus(server, {
   },
   onSignal
 });
+
+module.exports = app; //for unit tests
+
