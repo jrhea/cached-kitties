@@ -10,6 +10,10 @@
   },
   "author": "jonny rhea",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jrhea/cached-kitties.git"
+  },
   "dependencies": {
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
