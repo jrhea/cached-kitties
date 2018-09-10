@@ -8,9 +8,6 @@ var router = require('express').Router();
 // create and connect redis client to local instance.
 var cache = redis.createClient();
 
-cache.on('connect', () => {
-  console.log('Connected to redis');
-});
 // Print redis errors to the console
 cache.on('error', (err) => {
   console.log("Error " + err);
@@ -19,8 +16,40 @@ cache.on('error', (err) => {
 // add X-Response-Time header
 router.use(responseTime());
 
-//Retrieve Kitty by Id at a specific block height
-//http://localhost:8080/api/v1/cached-kitties/ropsten/kitties/12/6303417
+/**
+ * @swagger
+ * /api/cached-kitties/v1/{network}/kitties/{id}/{block}:
+ *   get:
+ *     summary: Returns details on a CryptoKitty by Id at a specific block height
+ *     produces:
+ *       - application/json
+ *     tags:
+ *       - CryptoKitties
+ *     parameters:
+ *       - name: network
+ *         description: desired network to query
+ *         in: path
+ *         required: true
+ *         type: string
+ *         enum: [mainnet, ropsten]
+ *         example: ropsten
+ *       - name: id
+ *         description: a unique CryptoKitty ID
+ *         in: path
+ *         required: true
+ *         type: integer
+ *         example: 12
+ *       - name: block
+ *         description: the target block to inspect
+ *         in: path
+ *         required: true
+ *         type: integer
+ *         example: 6303417
+ *     responses:
+ *       200:
+ *         description: details about a particular CryptoKitty
+ */
+//http://localhost:8080/api/cached-kitties/v1/ropsten/kitties/12/6303417
 router.get('/:network/kitties/:id/:block', function(req, res, next) {
     if(!isNaN(req.params.block)){
         var url = req.params.network+'/kitties/'+req.params.id+'/'+req.params.block;
@@ -38,8 +67,34 @@ router.get('/:network/kitties/:id/:block', function(req, res, next) {
         });
     }
 });
-//Retrieve Kitty by Id at the latest block height
-//http://localhost:8080/api/v1/cached-kitties/ropsten/kitties/12
+
+/**
+ * @swagger
+ * /api/cached-kitties/v1/{network}/kitties/{id}:
+ *   get:
+ *     summary: Returns details on a CryptoKitty by Id at the latest block
+ *     produces:
+ *       - application/json
+ *     tags:
+ *       - CryptoKitties
+ *     parameters:
+ *       - name: network
+ *         description: desired network to query
+ *         in: path
+ *         required: true
+ *         type: string
+ *         enum: [mainnet, ropsten]
+ *         example: ropsten
+ *       - name: id
+ *         description: a unique CryptoKitty ID
+ *         in: path
+ *         required: true
+ *         type: integer
+ *         example: 12
+ *     responses:
+ *       200:
+ *         description: details about a particular CryptoKitty
+ */
 router.get('/:network/kitties/:id', function(req, res, next) {
     kitties.getKittyById(req.params.id, 'latest').then(result => {
         res.status(200).json(result)
@@ -48,6 +103,39 @@ router.get('/:network/kitties/:id', function(req, res, next) {
     });
 });
 
+/**
+ * @swagger
+ * /api/cached-kitties/v1/{network}/getKittiesSoldByBlock/{fromBlock}/{toBlock}:
+ *   get:
+ *     summary: Find Kitties sold within a block range
+ *     produces:
+ *       - application/json
+ *     tags:
+ *       - CryptoKitties
+ *     parameters:
+ *       - name: network
+ *         description: desired network to query
+ *         in: path
+ *         required: true
+ *         type: string
+ *         enum: [mainnet, ropsten]
+ *         example: ropsten
+ *       - name: fromBlock
+ *         description: starting block height
+ *         in: path
+ *         required: true
+ *         type: integer
+ *         example: 6303970
+ *       - name: toBlock
+ *         description: ending block height
+ *         in: path
+ *         required: true
+ *         type: integer
+ *         example: 6303973
+ *     responses:
+ *       200:
+ *         description: list of CrytoKitties sold
+ */
 //List of Kitties sold by block
 //http://localhost:8080/api/v1/cached-kitties/ropsten/getKittiesSoldByBlock/6303970/6303973/
 router.get('/:network/getKittiesSoldByBlock/:fromBlock/:toBlock', function(req, res, next) {
@@ -105,7 +193,6 @@ function query(url, query){
     return new Promise((resolve,reject) => {
         queryCache(url).then((result) => {
             if(result){
-                console.log('Returning cached result');
                 const resultJSON = JSON.parse(result);
                 resolve(resultJSON);
             }
