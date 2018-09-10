@@ -131,7 +131,7 @@ router.get('/:network/kitties/:id', function(req, res, next) {
 //http://localhost:8080/api/v1/cached-kitties/ropsten/getKittiesSoldByBlock/6303970/6303973/
 router.get('/:network/getKittiesSoldByBlock/:fromBlock/:toBlock', function(req, res, next) {
     var url = req.params.network+'/getKittiesSoldByBlock/'+req.params.fromBlock+'/'+req.params.toBlock;
-    return query(url, auction.getKittiesSoldByBlock(req.params.fromBlock, req.params.toBlock)).then(result => {
+    return query(url, auction.getKittiesSoldByBlock(req.params.fromBlock, req.params.toBlock),req.cache).then(result => {
         res.status(200).json(result)
     }).catch(err => {
         res.json(err);

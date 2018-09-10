@@ -48,7 +48,7 @@ router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
         for(let i = 0; i < txCount; i++){
             params[1]="0x"+i.toString(16);
             url = baseURL+'/'+req.params.network+'/eth_getTransactionByBlockHashAndIndex?params='+JSON.stringify(params);
-            promises.push(query(url));
+            promises.push(query(url,req.cache));
         }
         Promise.all(promises).then(results => {
             res.status(200).json(results);
