@@ -16,7 +16,7 @@ var options = {
   // import swaggerDefinitions
   swaggerDefinition: swaggerDefinition,
   // path to the API docs
-  apis: ['../routes/api/*.js'],// pass all in array
+  apis: ['../routes/api/infura/v1/infura.js'],// pass all in array
   };
 // initialize swagger-jsdoc
 var swaggerSpec = swaggerJSDoc(options);
