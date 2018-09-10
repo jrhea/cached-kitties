@@ -32,3 +32,5 @@ app.use(require('./routes'));
 app.listen( process.env.PORT, function(){
   console.log('Listening on ' + this.address().address + ':' + this.address().port);
 });
+
+module.exports = app; //for unit tests
