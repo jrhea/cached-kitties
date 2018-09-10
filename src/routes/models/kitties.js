@@ -7,8 +7,9 @@ const contract = new web3.eth.Contract(contractABI, contractAddress)
 
 module.exports.getLatestBlock = async () => {
   return web3.eth.getBlock(web3.eth.defaultBlock).then((block) => {
+    console.log(block.number);
     return block.number-2;
-  });
+  }).catch();
 }
 
 module.exports.getKittyById = async (kittyId, blockNumber) => {
