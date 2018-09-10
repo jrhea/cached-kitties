@@ -4,7 +4,7 @@
   "description": "A Crypto Kitty read cache API service",
   "main": "server.js",
   "scripts": {
-    "start": "REDIS_URL=127.0.0.1 node ./server.js",
+    "start": "PORT=8080 REDIS_URL=127.0.0.1 node ./server.js",
     "dev": "sh scripts/run-dev.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -2,4 +2,4 @@
 
 trap 'pgrep redis-server |xargs kill' EXIT;
 redis-server > /dev/null &
-node server.js
+PORT=8080 REDIS_URL=127.0.0.1 node server.js

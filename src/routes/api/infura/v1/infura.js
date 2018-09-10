@@ -10,11 +10,6 @@ var baseURL = 'https://api.infura.io/v1/jsonrpc';
 
 cache.on('connect', () => {
   console.log('Connected to redis');
-  cache.flushdb((err,succeeded) => {
-    if(succeeded) {
-        console.log('Flushed Redis Cache');
-    }
-  })
 });
 // Print redis errors to the console
 cache.on('error', (err) => {
@@ -26,19 +21,29 @@ router.use(responseTime());
 
 /**
  * @swagger
- * /:network/view_getTransactionsByHash:
+ * /api/infura/v1/{network}/view_getTransactionsByHash:
  *   get:
  *     description: return all transactions found in a block hash
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: network
+ *         description: mainnet, ropsten, etc
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: params
+ *         description: a string representing the hash (32 bytes) of a block
+ *         in: query
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         description: a list of transactions
  *         schema:
  *           type: array
  *           items:
- *             type: 'string'
+ *             type: object
  */
 router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
     var url = baseURL+'/'+req.params.network+'/eth_getBlockTransactionCountByHash?params='+req.query.params;
@@ -60,6 +65,28 @@ router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
     });
 });
 
+/**
+ * @swagger
+ * /api/infura/v1/{network}/{method}:
+ *   get:
+ *     description: Infura gateway passthrough endpoint
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: network
+ *         description: mainnet, ropsten, etc
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: method
+ *         description: eth_gasPrice, eth_getBlockByHash, eth_getBlockTransactionCountByHash, eth_getTransactionByBlockHashAndIndex, etc
+ *         in: path
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: a list of transactions
+ */
 router.get('/:network/:method', function(req, res, next) {
     var url = baseURL + req.url;
     return query(url).then(result => {
