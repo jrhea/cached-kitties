@@ -29,6 +29,6 @@ app.get('/swagger', (req, res) => {
 app.use(require('./routes'));
 
 // serve api
-app.listen( process.env.PORT || 8080, function(){
+app.listen( process.env.PORT, function(){
   console.log('Listening on ' + this.address().address + ':' + this.address().port);
 });
