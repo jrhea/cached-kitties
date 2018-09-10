@@ -1,17 +1,8 @@
 var router = require('express').Router();
     axios = require('axios');
-    redis = require('redis');
     responseTime = require('response-time');
 
-// create and connect redis client to local instance.
-var cache = redis.createClient();
-
 var baseURL = 'https://api.infura.io/v1/jsonrpc';
-
-// Print redis errors to the console
-cache.on('error', (err) => {
-  console.log("Error " + err);
-});
 
 // add X-Response-Time header
 router.use(responseTime());
@@ -103,22 +94,22 @@ router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
  */
 router.get('/:network/:method', function(req, res, next) {
     var url = baseURL + req.url;
-    return query(url).then(result => {
+    return query(url,req.cache).then(result => {
         res.status(200).json(result)
     }).catch(err => {
         res.json(err);
     });
 });
 
-function query(url){
+function query(url,cache){
     return new Promise((resolve,reject) => {
-        queryCache(url).then((result) => {
+        queryCache(url,cache).then((result) => {
             if(result){
                 const resultJSON = JSON.parse(result);
                 resolve(resultJSON);
             }
             else{
-                queryAPI(url).then(response => {
+                queryAPI(url,cache).then(response => {
                     resolve(response);
                 }).catch(err => {
                     return new Error(err);
@@ -128,7 +119,7 @@ function query(url){
     });
 }
 
-function queryCache(url){
+function queryCache(url,cache){
     return new Promise((resolve,reject) => {
         cache.get(url, (err,result) => {
             resolve(result);
@@ -136,7 +127,7 @@ function queryCache(url){
     });
 }
 
-function queryAPI(url){
+function queryAPI(url,cache){
     return axios.get(url).then(response => {
         //Don't cache result if it contains an error message from infura
         if(!response.data.hasOwnProperty('error') && !(response.data.hasOwnProperty('result') && response.data.result === null && typeof response.data.result === "object") ){

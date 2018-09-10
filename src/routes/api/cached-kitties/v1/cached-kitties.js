@@ -1,17 +1,8 @@
 var router = require('express').Router();
     axios = require('axios');
-    redis = require('redis');
     responseTime = require('response-time');
     kitties = require('../../../models/kitties');
     auction = require('../../../models/auction');
-
-// create and connect redis client to local instance.
-var cache = redis.createClient();
-
-// Print redis errors to the console
-cache.on('error', (err) => {
-  console.log("Error " + err);
-});
 
 // add X-Response-Time header
 router.use(responseTime());
@@ -53,7 +44,7 @@ router.use(responseTime());
 router.get('/:network/kitties/:id/:block', function(req, res, next) {
     if(!isNaN(req.params.block)){
         var url = req.params.network+'/kitties/'+req.params.id+'/'+req.params.block;
-        return query(url, kitties.getKittyById(req.params.id, req.params.block)).then(result => {
+        return query(url, kitties.getKittyById(req.params.id, req.params.block), req.cache).then(result => {
             res.status(200).json(result)
         }).catch(err => {
             res.json(err);
@@ -189,15 +180,15 @@ router.get('/:network/gen/:gen/calcVarianceSold/:hours', function(req, res, next
 router.get('/:network/listUnderValuedKitties', function(req, res, next) {
 });*/
 
-function query(url, query){
+function query(url, query, cache){
     return new Promise((resolve,reject) => {
-        queryCache(url).then((result) => {
+        queryCache(url,cache).then((result) => {
             if(result){
                 const resultJSON = JSON.parse(result);
                 resolve(resultJSON);
             }
             else{
-                queryAPI(url, query).then(response => {
+                queryAPI(url, query, cache).then(response => {
                     resolve(response);
                 }).catch(err => {
                     return new Error(err);
@@ -207,7 +198,7 @@ function query(url, query){
     });
 }
 
-function queryCache(url){
+function queryCache(url,cache){
     return new Promise((resolve,reject) => {
         cache.get(url, (err,result) => {
             resolve(result);
@@ -215,7 +206,7 @@ function queryCache(url){
     });
 }
 
-function queryAPI(url, query){
+function queryAPI(url, query, cache){
     return query.then((resolve, reject) => {
         //Don't cache result if it contains an error message from infura
         if(resolve){
