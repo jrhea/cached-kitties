@@ -26,12 +26,22 @@ router.use(responseTime());
 
 /**
  * @swagger
- * /:network/view_getTransactionsByHash:
+ * /api/infura/v1/{network}/view_getTransactionsByHash:
  *   get:
  *     description: return all transactions found in a block hash
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: network
+ *         description: mainnet, ropsten, etc
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: params
+ *         description: a string representing the hash (32 bytes) of a block
+ *         in: query
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         description: a list of transactions
