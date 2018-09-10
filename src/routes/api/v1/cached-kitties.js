@@ -3,6 +3,7 @@ var router = require('express').Router();
     redis = require('redis');
     responseTime = require('response-time');
     kitties = require('../../models/kitties');
+    auction = require('../../models/auction');
 
 // create and connect redis client to local instance.
 var cache = redis.createClient();
@@ -24,10 +25,10 @@ cache.on('error', (err) => {
 router.use(responseTime());
 
 //Retrieve Kitty by Id at a specific block height
-//http://localhost:8080/api/v1/cached-kitties/ropsten/kitties/12/6303417/
+//http://localhost:8080/api/v1/cached-kitties/ropsten/kitties/12/6303417
 router.get('/:network/kitties/:id/:block', function(req, res, next) {
     if(!isNaN(req.params.block)){
-        var url = 'https://api.infura.io/v1/cached-kitties/'+req.params.network+'/kitties/'+req.params.id+'/'+req.params.block;
+        var url = req.params.network+'/kitties/'+req.params.id+'/'+req.params.block;
         return query(url, kitties.getKittyById(req.params.id, req.params.block)).then(result => {
             res.status(200).json(result)
         }).catch(err => {
@@ -41,6 +42,26 @@ router.get('/:network/kitties/:id/:block', function(req, res, next) {
             res.json(err);
         });
     }
+});
+//Retrieve Kitty by Id at the latest block height
+//http://localhost:8080/api/v1/cached-kitties/ropsten/kitties/12
+router.get('/:network/kitties/:id', function(req, res, next) {
+    kitties.getKittyById(req.params.id, 'latest').then(result => {
+        res.status(200).json(result)
+    }).catch(err => {
+        res.json(err);
+    });
+});
+
+//List of Kitties sold by block
+//http://localhost:8080/api/v1/cached-kitties/ropsten/getKittiesSoldByBlock/6303970/6303973/
+router.get('/:network/getKittiesSoldByBlock/:fromBlock/:toBlock', function(req, res, next) {
+    var url = req.params.network+'/getKittiesSoldByBlock/'+req.params.fromBlock+'/'+req.params.toBlock;
+    return query(url, auction.getKittiesSoldByBlock(req.params.fromBlock, req.params.toBlock)).then(result => {
+        res.status(200).json(result)
+    }).catch(err => {
+        res.json(err);
+    });
 });
 
 //List of Kitties for sale by block
