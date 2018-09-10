@@ -10,11 +10,6 @@ var cache = redis.createClient();
 
 cache.on('connect', () => {
   console.log('Connected to redis');
-  cache.flushdb((err,succeeded) => {
-    if(succeeded) {
-        console.log('Flushed Redis Cache');
-    }
-  })
 });
 // Print redis errors to the console
 cache.on('error', (err) => {
