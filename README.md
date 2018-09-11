@@ -5,25 +5,35 @@ A Crypto Kitty read cache API service
 
 ## Installation
 
-brew install redis
-
-cd src && npm install
-
+```bash
+$ brew install redis
+$ cd src && npm install
+```
 ## How to run
 
 ***development:***
 ```bash
 $ npm run dev
 ```
-
+or
+```bash
+$ sh scripts/run-dev.sh 8080
+```
 ***production:***
 ```bash
 $ npm run prod
 ```
-
+or
+```bash
+$ PORT=8080 REDIS_URL=127.0.0.1 node ./server.js
+```
 ***tests***
 ```bash
 $ npm test
+```
+or
+```bash
+$ sh scripts/run-tests.sh 8080
 ```
 ## Swagger Documentation
 
