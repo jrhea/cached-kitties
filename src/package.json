@@ -6,7 +6,7 @@
   "scripts": {
     "prod": "PORT=8080 REDIS_URL=127.0.0.1 node ./server.js",
     "dev": "sh scripts/run-dev.sh 8080",
-    "test": "sh `pwd`/scripts/run-tests.sh 8080"
+    "test": "sh scripts/run-tests.sh 8080"
   },
   "author": "jonny rhea",
   "license": "MIT",
