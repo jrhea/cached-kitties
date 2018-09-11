@@ -25,7 +25,7 @@ router.use(responseTime());
  *         enum: [mainnet, ropsten]
  *         example: mainnet
  *       - name: params
- *         description: a string representing the hash (32 bytes) of a block
+ *         description: a string representing an array containing the hash (32 bytes) of a block
  *         in: query
  *         required: true
  *         type: string
@@ -52,6 +52,64 @@ router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
         }
         Promise.all(promises).then(results => {
             res.status(200).json(results);
+        });
+    }).catch(err => {
+        res.json(err);
+    });
+});
+
+/**
+ * @swagger
+ * /api/infura/v1/{network}/view_getTransactionsByHashAndAddress:
+ *   get:
+ *     summary: Returns transactions to a specific addresss found in a block hash
+ *     produces:
+ *       - application/json
+ *     tags:
+ *       - Infura
+ *     parameters:
+ *       - name: network
+ *         description: desired network to query
+ *         in: path
+ *         required: true
+ *         type: string
+ *         enum: [mainnet, ropsten]
+ *         example: mainnet
+ *       - name: params
+ *         description: a string representing an array containing the hash (32 bytes) of a block and an address
+ *         in: query
+ *         required: true
+ *         type: string
+ *         example: '["0xb3b20624f8f0f86eb50dd04688409e5cea4bd02d700bf6e79e9384d47d6a5a35","0xfb0f7189b354660e649ae14261a9fe0e8febf369"]'
+ *     responses:
+ *       200:
+ *         description: a list of transactions
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ */
+router.get('/:network/view_getTransactionsByHashAndAddress', function(req, res, next) {
+    let params = JSON.parse(req.query.params);
+    let hash = params[0]
+    let address = params[1];
+    var url = baseURL+'/'+req.params.network+'/eth_getBlockTransactionCountByHash?params=["'+hash+'"]';
+    return query(url,req.cache).then(result => {
+        let promises = [];
+        let txCount = parseInt(result.result);
+        for(let i = 0; i < txCount; i++){
+            let index = "0x"+i.toString(16);
+            url = baseURL+'/'+req.params.network+'/eth_getTransactionByBlockHashAndIndex?params=['+JSON.stringify(hash)+','+JSON.stringify(index)+']';
+            promises.push(query(url,req.cache));
+        }
+        Promise.all(promises).then(results => {
+            let filteredResults = [];
+            for(let i = 0; i < results.length; i++){
+                if (results[i].result.to == address){
+                    filteredResults.push(results[i]);
+                }
+            }
+            res.status(200).json(filteredResults);
         });
     }).catch(err => {
         res.json(err);
