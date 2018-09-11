@@ -5,9 +5,11 @@ var express    = require('express');
     terminus = require ('@godaddy/terminus');
 
 var app = express();
-var cache = redis.createClient();
+var cache = null;
 
 function startCache() {
+  cache = redis.createClient();
+
   cache.on('connect', () => {
     console.log('Connected to redis');
     cache.flushdb((err,succeeded) => {
@@ -24,7 +26,7 @@ function startCache() {
 }
 
 var cacheMiddleware = function (req,res,next) {
-    if(!cache || cache.status !== 'ready') {
+    if(!cache || !cache.ready) {
         startCache();
     }
     req.cache = cache;
@@ -68,7 +70,7 @@ function onSignal() {
 }
 
 async function onHealthCheck() {
-  return cache.status === 'ready' ? Promise.resolve() : Promise.reject(new Error('not ready'));
+  return cache.ready ? Promise.resolve() : Promise.reject(new Error('not ready'));
 }
 //HEALTHCHECK BLOCK
 
