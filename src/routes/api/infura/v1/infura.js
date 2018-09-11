@@ -1,7 +1,7 @@
 var router = require('express').Router();
     axios = require('axios');
     responseTime = require('response-time');
-    query = require('../../../models/cache-inf').query;
+    query = require('../../../../utils/cache-inf').query;
 
 var baseURL = 'https://api.infura.io/v1/jsonrpc';
 

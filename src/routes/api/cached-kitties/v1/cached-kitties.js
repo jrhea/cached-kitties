@@ -3,7 +3,7 @@ var router = require('express').Router();
     responseTime = require('response-time');
     kitties = require('../../../models/kitties');
     auction = require('../../../models/auction');
-    query = require('../../../models/cache-inf').query;
+    query = require('../../../../utils/cache-inf').query;
 
 // add X-Response-Time header
 router.use(responseTime());
