@@ -1,6 +1,7 @@
 var router = require('express').Router();
     axios = require('axios');
     responseTime = require('response-time');
+    query = require('../../../models/cache-inf').query;
 
 var baseURL = 'https://api.infura.io/v1/jsonrpc';
 
@@ -40,7 +41,7 @@ router.use(responseTime());
  */
 router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
     var url = baseURL+'/'+req.params.network+'/eth_getBlockTransactionCountByHash?params='+req.query.params;
-    return query(url,req.cache).then(result => {
+    return query(url,null,req.cache).then(result => {
         let promises = [];
         let txCount = parseInt(result.result);
         let params = JSON.parse(req.query.params);
@@ -48,7 +49,7 @@ router.get('/:network/view_getTransactionsByHash', function(req, res, next) {
         for(let i = 0; i < txCount; i++){
             params[1]="0x"+i.toString(16);
             url = baseURL+'/'+req.params.network+'/eth_getTransactionByBlockHashAndIndex?params='+JSON.stringify(params);
-            promises.push(query(url,req.cache));
+            promises.push(query(url,null,req.cache));
         }
         Promise.all(promises).then(results => {
             res.status(200).json(results);
@@ -94,13 +95,13 @@ router.get('/:network/view_getTransactionsByHashAndAddress', function(req, res, 
     let hash = params[0]
     let address = params[1];
     var url = baseURL+'/'+req.params.network+'/eth_getBlockTransactionCountByHash?params=["'+hash+'"]';
-    return query(url,req.cache).then(result => {
+    return query(url,null,req.cache).then(result => {
         let promises = [];
         let txCount = parseInt(result.result);
         for(let i = 0; i < txCount; i++){
             let index = "0x"+i.toString(16);
             url = baseURL+'/'+req.params.network+'/eth_getTransactionByBlockHashAndIndex?params=['+JSON.stringify(hash)+','+JSON.stringify(index)+']';
-            promises.push(query(url,req.cache));
+            promises.push(query(url,null,req.cache));
         }
         Promise.all(promises).then(results => {
             let filteredResults = [];
@@ -152,54 +153,12 @@ router.get('/:network/view_getTransactionsByHashAndAddress', function(req, res, 
  */
 router.get('/:network/:method', function(req, res, next) {
     var url = baseURL + req.url;
-    return query(url,req.cache).then(result => {
+    return query(url,null,req.cache).then(result => {
         res.status(200).json(result)
     }).catch(err => {
         res.json(err);
     });
 });
 
-function query(url,cache){
-    return new Promise((resolve,reject) => {
-        queryCache(url,cache).then((result) => {
-            if(result){
-                const resultJSON = JSON.parse(result);
-                resolve(resultJSON);
-            }
-            else{
-                queryAPI(url,cache).then(response => {
-                    resolve(response);
-                }).catch(err => {
-                    return new Error(err);
-                });
-            }
-        });
-    });
-}
-
-function queryCache(url,cache){
-    return new Promise((resolve,reject) => {
-        cache.get(url, (err,result) => {
-            resolve(result);
-        });
-    });
-}
-
-function queryAPI(url,cache){
-    return axios.get(url).then(response => {
-        //Don't cache result if it contains an error message from infura
-        if(!response.data.hasOwnProperty('error') && !(response.data.hasOwnProperty('result') && response.data.result === null && typeof response.data.result === "object") ){
-            //TODO it would be really cool if we could implement a listener to expire cache entires on a new block
-            cache.set(url,JSON.stringify(response.data),'EX',30);
-        }
-        else{
-            throw new Error(JSON.stringify(response.data.error));
-        }
-        return response.data;
-    }).catch(err => {
-        //console.log(err);
-        return new Error(err);
-    });
-};
-
 module.exports = router;
+
