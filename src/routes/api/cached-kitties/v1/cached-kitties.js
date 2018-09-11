@@ -210,7 +210,8 @@ function queryAPI(url, query, cache){
     return query.then((resolve, reject) => {
         //Don't cache result if it contains an error message from infura
         if(resolve){
-            cache.set(url,JSON.stringify(resolve));
+            //TODO it would be really cool if we could implement a listener to expire cache entires on a new block
+            cache.set(url,JSON.stringify(resolve),'EX',30);
         }
         else{
             throw new Error(JSON.stringify(reject));
