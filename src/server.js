@@ -70,7 +70,11 @@ function onSignal() {
 }
 
 async function onHealthCheck() {
-  return cache.ready ? Promise.resolve() : Promise.reject(new Error('not ready'));
+  if(cache) {
+    return cache.ready ? Promise.resolve() : Promise.reject(new Error('not ready'));
+  } else {
+    return Promise.resolve();
+  }
 }
 //HEALTHCHECK BLOCK
 
@@ -80,10 +84,11 @@ var server = app.listen( process.env.PORT || 8080, function(){
 });
 
 terminus(server, {
-  signal: 'SIGINT',
   healthChecks: {
     '/healthcheck': onHealthCheck,
   },
+  timeout: 5000,
+  signal: 'SIGINT',
   onSignal
 });
 

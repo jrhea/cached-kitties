@@ -189,7 +189,8 @@ function queryAPI(url,cache){
     return axios.get(url).then(response => {
         //Don't cache result if it contains an error message from infura
         if(!response.data.hasOwnProperty('error') && !(response.data.hasOwnProperty('result') && response.data.result === null && typeof response.data.result === "object") ){
-            cache.set(url,JSON.stringify(response.data));
+            //TODO it would be really cool if we could implement a listener to expire cache entires on a new block
+            cache.set(url,JSON.stringify(response.data),'EX',30);
         }
         else{
             throw new Error(JSON.stringify(response.data.error));
