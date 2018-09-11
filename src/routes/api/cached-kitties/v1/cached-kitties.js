@@ -3,6 +3,7 @@ var router = require('express').Router();
     responseTime = require('response-time');
     kitties = require('../../../models/kitties');
     auction = require('../../../models/auction');
+    query = require('../../../models/cache-inf').query;
 
 // add X-Response-Time header
 router.use(responseTime());
@@ -179,48 +180,5 @@ router.get('/:network/gen/:gen/calcVarianceSold/:hours', function(req, res, next
 //List of for sale kitties that are undervalued ( we will have to create a model that predicts which kitties can be immediately bought and sold for a profit )
 router.get('/:network/listUnderValuedKitties', function(req, res, next) {
 });*/
-
-function query(url, query, cache){
-    return new Promise((resolve,reject) => {
-        queryCache(url,cache).then((result) => {
-            if(result){
-                const resultJSON = JSON.parse(result);
-                resolve(resultJSON);
-            }
-            else{
-                queryAPI(url, query, cache).then(response => {
-                    resolve(response);
-                }).catch(err => {
-                    return new Error(err);
-                });
-            }
-        });
-    });
-}
-
-function queryCache(url,cache){
-    return new Promise((resolve,reject) => {
-        cache.get(url, (err,result) => {
-            resolve(result);
-        });
-    });
-}
-
-function queryAPI(url, query, cache){
-    return query.then((resolve, reject) => {
-        //Don't cache result if it contains an error message from infura
-        if(resolve){
-            //TODO it would be really cool if we could implement a listener to expire cache entires on a new block
-            cache.set(url,JSON.stringify(resolve),'EX',30);
-        }
-        else{
-            throw new Error(JSON.stringify(reject));
-        }
-        return resolve;
-    }).catch(err => {
-        //console.log(err);
-        return new Error(err);
-    });
-};
 
 module.exports = router;
